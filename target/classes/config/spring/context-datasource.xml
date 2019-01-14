@@ -40,7 +40,7 @@
 	 	<property name="username" value="${jdbc.username}"/> 
 	 	<property name="password" value="${jdbc.password}"/> 
 	 	
-	 	<!-- 4개의 설정은 동일하게 설정하는 것이 예외 케이스를 줄일 수 있음 --> 
+	 	<!-- 4개의 설정은 동일하게 설정하는 것이 예외 케이스를 줄일 수 있음!!!! --> 
 	 	<property name="initialSize" value="20"/> 
 	 	<property name="maxTotal" value="20"/> 
 	 	<property name="maxIdle" value="20"/> 
