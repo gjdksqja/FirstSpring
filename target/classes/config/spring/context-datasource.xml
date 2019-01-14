@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+						http://www.springframework.org/schema/jdbc  http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+						http://www.springframework.org/schema/context 
+      					http://www.springframework.org/schema/context/spring-context-3.2.xsd
+						http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+						
+	<bean id="environmentVariablesConfiguration" class="org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig">  
+        <property name="algorithm" value="PBEWithMD5AndDES" />  
+        <property name="password" value="BRACE_PASS" />
+	</bean>  
+	       
+	<bean id="configurationEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">  
+	        <property name="config" ref="environmentVariablesConfiguration" />  
+	</bean> 
+	
+	<!-- 
+	 ============================================================
+	 ==		PropertyPlaceholderConfigurer
+	 ============================================================
+	 -->
+	 
+
+ 	
+  	<bean id="propertyConfigurer" class="org.jasypt.spring3.properties.EncryptablePropertyPlaceholderConfigurer" >
+  		<constructor-arg ref="configurationEncryptor"/>
+		<property name="locations">
+			<value>classpath:/props/config.properties</value>
+		   </property>
+	</bean> 
+			
+						   
+	 <bean id="sampleDataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close"> 
+	 	<property name="driverClassName" value="${jdbc.driverClassName}"/> 
+	 	<property name="url" value="${jdbc.url}"/> 
+	 	<property name="username" value="${jdbc.username}"/> 
+	 	<property name="password" value="${jdbc.password}"/> 
+	 	
+	 	<!-- 4개의 설정은 동일하게 설정하는 것이 예외 케이스를 줄일 수 있음 --> 
+	 	<property name="initialSize" value="20"/> 
+	 	<property name="maxTotal" value="20"/> 
+	 	<property name="maxIdle" value="20"/> 
+	 	<property name="minIdle" value="20"/> 
+	</bean>
+
+    
+    <bean id="dataSource" class="net.sf.log4jdbc.Log4jdbcProxyDataSource">
+		<constructor-arg ref="sampleDataSource" />
+		<property name="logFormatter">
+			<bean class="net.sf.log4jdbc.tools.Log4JdbcCustomFormatter">
+				<property name="loggingType" value="MULTI_LINE" />
+				<property name="sqlPrefix" value="SQL         :  "/>
+			</bean>
+		</property>
+	</bean>
+	
+	<!-- Transaction Manager (트랜잭션이란 : http://springmvc.egloos.com/495798 , AOP이용 사용 : http://kevini.dothome.co.kr/?p=397 )  --> 
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"> 
+		<property name="dataSource" ref="dataSource" /> 
+	</bean> 
+	
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+</beans>
+ 
